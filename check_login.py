@@ -66,30 +66,34 @@ def _is_security_questions_page(page) -> bool:
 
 
 PUSHOVER_TOKEN = "atnyrpx4yrn8g3dcw1c9so35ngdhr1"
-PUSHOVER_USER  = "upcscqtgbhzmtnrax8asirvyzocbdj"
+PUSHOVER_USERS = [
+    "upcscqtgbhzmtnrax8asirvyzocbdj",
+    "ube59dzs3x5nq5b2xcypjzkqau2pdp",
+]
 
 
 def _send_notification(message: str) -> None:
     """Send a push notification to iPhone via Pushover, with a Windows toast as fallback."""
     # ── Pushover (iPhone) ───────────────────────────────────────────────────────
     try:
-        payload = urllib.parse.urlencode({
-            "token":   PUSHOVER_TOKEN,
-            "user":    PUSHOVER_USER,
-            "title":   "US Visa Login",
-            "message": message,
-            "priority": 1,          # high priority — bypasses quiet hours
-        }).encode()
-        req = urllib.request.Request(
-            "https://api.pushover.net/1/messages.json",
-            data=payload,
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            if resp.status == 200:
-                print("[*] Pushover notification sent to iPhone.")
-            else:
-                print(f"[!] Pushover returned HTTP {resp.status}")
+        for user_key in PUSHOVER_USERS:
+            payload = urllib.parse.urlencode({
+                "token":   PUSHOVER_TOKEN,
+                "user":    user_key,
+                "title":   "US Visa Login",
+                "message": message,
+                "priority": 1,
+            }).encode()
+            req = urllib.request.Request(
+                "https://api.pushover.net/1/messages.json",
+                data=payload,
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status == 200:
+                    print("[*] Pushover notification sent to iPhone.")
+                else:
+                    print(f"[!] Pushover returned HTTP {resp.status}")
     except Exception as exc:
         print(f"[!] Pushover failed: {exc}")
 
